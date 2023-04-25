@@ -3,7 +3,7 @@ from django.contrib.auth.models import (
     AbstractBaseUser
 )
 import uuid
-from .managers import UserManager
+from user.managers import UserManager
 
 import random
 
@@ -27,6 +27,9 @@ class User(AbstractBaseUser):
         verbose_name='email address',
         max_length=255,
         unique=True,
+        error_messages={
+            "unique": "This email is already taken."
+        }
     )
 
     profile = models.ImageField(upload_to="uploads", blank=True)
