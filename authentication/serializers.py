@@ -1,17 +1,23 @@
 from rest_framework import serializers
 from user.models import User
-from django.contrib.auth.password_validation import validate_password
+from services.validation import validate_password
 
 
 class CreateUserSerialzier(serializers.ModelSerializer):
-    password = serializers.CharField(
-        write_only=True,
-        validators=[validate_password]
-    )
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
         fields = ["id", "username", "email", "password"]
+
+    def validate(self, attrs):
+        password = attrs.get("password")
+
+        if password:
+            instance = User(**attrs)
+            validate_password(password, instance)
+
+        return attrs
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -29,6 +35,8 @@ class UploadProfileSerializer(serializers.ModelSerializer):
         fields = ["profile"]
 
     def update(self, instance, validated_data):
+        print(self.instance)
+        print(instance)
         instance.profile = validated_data.get("profile", instance.profile)
         instance.save()
         return instance
