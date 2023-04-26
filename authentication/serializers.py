@@ -21,3 +21,14 @@ class CommonUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email"]
+
+
+class UploadProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["profile"]
+
+    def update(self, instance, validated_data):
+        instance.profile = validated_data.get("profile", instance.profile)
+        instance.save()
+        return instance
