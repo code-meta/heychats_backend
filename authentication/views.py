@@ -10,9 +10,8 @@ from user.models import User
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 
+
 # ! create new users
-
-
 class CreateAccountView(APIView):
     def post(self, request, format=None):
 
@@ -105,6 +104,24 @@ class LoginView(APIView):
                 "message": "logged in successfully!",
                 "data": {
                     "token": token,
+                    "user": userInfo
+                }
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+# ! returns basic user informations
+class UserInfoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        userInfo = CommonUserInfoSerializer(instance=request.user).data
+
+        return Response(
+            {
+                "message": "basic user informations!",
+                "data": {
                     "user": userInfo
                 }
             },
