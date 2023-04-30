@@ -26,6 +26,14 @@ class FindConnectionView(APIView):
                 }
             }, status=status.HTTP_404_NOT_FOUND)
 
+        except ValueError:
+            return Response({
+                "error": {
+                    "message": "Invalid id type.",
+                    "status": "422"
+                }
+            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
         except:
             return Response({
                 "error": {
