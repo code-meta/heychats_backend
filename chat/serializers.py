@@ -8,3 +8,8 @@ class FindConnectionSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "username", "profile"]
 
+
+class CommonUserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "profile"]
