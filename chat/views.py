@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from chat.serializers import FindConnectionSerializer
+from chat.serializers import FindConnectionSerializer, CommonUserInfoSerializer
 from chat.models import ChatRoom
 from user.models import User
 from django.db.models import Q
@@ -107,6 +107,63 @@ class CreateConnectionView(APIView):
                     "status": "404"
                 }
             }, status=status.HTTP_404_NOT_FOUND)
+
+        except:
+            return Response({
+                "error": {
+                    "message": "Something went wrong!",
+                    "status": "500"
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ! returns all the chats for an authenticated user
+class ChatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        try:
+            rooms = ChatRoom.objects.filter(
+                Q(user1=request.user) | Q(user2=request.user)
+            )
+
+            if not rooms:
+                return Response({
+                    "error": {
+                        "message": "no chats found!",
+                        "status": "404"
+                    }
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            chat_connections = []
+
+            for room in rooms:
+                if room.user1.id != request.user.id:
+                    user = CommonUserInfoSerializer(instance=room.user1).data
+                    chat_connections.append(
+                        {
+                            "username": user.get("username"),
+                            "profile": user.get("profile"),
+                            "room_id": room.room_id,
+                        }
+                    )
+
+                if room.user1.id == request.user.id:
+                    user = CommonUserInfoSerializer(instance=room.user2).data
+
+                    chat_connections.append(
+                        {
+                            "username": user.get("username"),
+                            "profile": user.get("profile"),
+                            "room_id": room.room_id,
+                        }
+                    )
+
+            return Response(
+                {"message": "all the chat connections.",
+                    "data": {"chats": chat_connections}},
+                status=status.HTTP_200_OK
+            )
 
         except:
             return Response({
