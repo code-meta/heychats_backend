@@ -11,13 +11,13 @@ import os
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-
 from chat.ws_routes import ws_urlpatterns
+from chat.middlewares import JWTAuthMiddleware
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'heychats_backend.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": URLRouter(ws_urlpatterns)
+    "websocket": JWTAuthMiddleware(URLRouter(ws_urlpatterns))
 })

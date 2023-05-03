@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from chat.serializers import FindConnectionSerializer, CommonUserInfoSerializer
-from chat.models import ChatRoom
+from chat.serializers import FindConnectionSerializer, CommonUserInfoSerializer, TextMessageSerializer
+from chat.models import ChatRoom, TextMessage
 from user.models import User
 from django.db.models import Q
 
@@ -164,6 +164,40 @@ class ChatsView(APIView):
                     "data": {"chats": chat_connections}},
                 status=status.HTTP_200_OK
             )
+
+        except:
+            return Response({
+                "error": {
+                    "message": "Something went wrong!",
+                    "status": "500"
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ! Chat messages
+class ChatMessageView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        try:
+            room_id = request.data.get("room_id")
+
+            records = TextMessage.objects.filter(
+                room_id=room_id
+            ).order_by("-created_at")[:50]
+
+            messages = []
+
+            for item in records:
+                data = TextMessageSerializer(instance=item).data
+                messages.append(data)
+
+            messages.reverse()
+
+            return Response({
+                "message": "all the messages",
+                "data": {"messages": messages}
+            }, status=status.HTTP_200_OK)
 
         except:
             return Response({

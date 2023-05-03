@@ -25,3 +25,13 @@ class ChatRoom(models.Model):
     def clean(self):
         if self.user1 == self.user2:
             raise ValidationError("user1 and user2 cannot be same")
+
+
+class TextMessage(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, auto_created=True
+    )
+    sender = models.UUIDField()
+    message = models.TextField()
+    room_id = models.BigIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
