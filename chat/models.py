@@ -35,3 +35,13 @@ class TextMessage(models.Model):
     message = models.TextField()
     room_id = models.BigIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ImageMessage(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, auto_created=True
+    )
+    sender = models.UUIDField()
+    image = models.ImageField(upload_to="uploads", blank=True)
+    room_id = models.BigIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

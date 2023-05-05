@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from chat.serializers import FindConnectionSerializer, CommonUserInfoSerializer, TextMessageSerializer
-from chat.models import ChatRoom, TextMessage
+from chat.serializers import FindConnectionSerializer, CommonUserInfoSerializer, TextMessageSerializer, ImageMessageSerializer
+from chat.models import ChatRoom, TextMessage, ImageMessage
 from user.models import User
 from django.db.models import Q
 
@@ -184,15 +184,25 @@ class ChatMessageView(APIView):
 
             records = TextMessage.objects.filter(
                 room_id=room_id
-            ).order_by("-created_at")[:50]
+            ).order_by("-created_at")[:25]
+
+            irecords = ImageMessage.objects.filter(
+                room_id=room_id
+            ).order_by("-created_at")[:25]
 
             messages = []
 
             for item in records:
                 data = TextMessageSerializer(instance=item).data
+                data["type"] = "text"
                 messages.append(data)
 
-            messages.reverse()
+            for item in irecords:
+                data = ImageMessageSerializer(instance=item).data
+                data["type"] = "image"
+                messages.append(data)
+
+            messages.sort(key=lambda x: x['created_at'])
 
             return Response({
                 "message": "all the messages",
