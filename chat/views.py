@@ -140,24 +140,43 @@ class ChatsView(APIView):
             for room in rooms:
                 if room.user1.id != request.user.id:
                     user = CommonUserInfoSerializer(instance=room.user1).data
+
+                    tMessages = TextMessage.objects.filter(
+                        room_id=room.room_id).count()
+
+                    iMessages = ImageMessage.objects.filter(
+                        room_id=room.room_id).count()
+
                     chat_connections.append(
                         {
                             "username": user.get("username"),
                             "profile": user.get("profile"),
                             "room_id": room.room_id,
+                            "total_messages": tMessages + iMessages
                         }
                     )
 
                 if room.user1.id == request.user.id:
                     user = CommonUserInfoSerializer(instance=room.user2).data
 
+                    tMessages = TextMessage.objects.filter(
+                        room_id=room.room_id).count()
+
+                    iMessages = ImageMessage.objects.filter(
+                        room_id=room.room_id).count()
+
                     chat_connections.append(
                         {
                             "username": user.get("username"),
                             "profile": user.get("profile"),
                             "room_id": room.room_id,
+                            "total_messages": tMessages + iMessages
                         }
                     )
+
+            chat_connections.sort(
+                key=lambda x: x['total_messages'], reverse=True
+            )
 
             return Response(
                 {"message": "all the chat connections.",
