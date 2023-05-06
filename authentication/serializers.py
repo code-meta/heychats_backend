@@ -26,7 +26,7 @@ class CreateUserSerialzier(serializers.ModelSerializer):
 class CommonUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "profile"]
+        fields = ["id", "username", "email", "profile", "connection_id"]
 
 
 class UploadProfileSerializer(serializers.ModelSerializer):
