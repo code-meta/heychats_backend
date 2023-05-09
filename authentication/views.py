@@ -66,7 +66,7 @@ class UploadProfileView(APIView):
 
         try:
             serializer.save()
-            return Response({"message": "profle picture has uploaded."}, status=status.HTTP_200_OK)
+            return Response({"message": "profle picture has uploaded.", "data": serializer.data}, status=status.HTTP_200_OK)
 
         except:
             return Response({
