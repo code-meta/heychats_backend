@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from authentication.serializers import CreateUserSerialzier, CommonUserInfoSerializer, UploadProfileSerializer, UserLoginSerializer
+from authentication.serializers import CreateUserSerialzier, CommonUserInfoSerializer, UploadProfileSerializer, UserLoginSerializer, UpdateUserProfileSerializer
 from rest_framework import status
 from services.token import get_tokens_for_user
 from user.models import User
@@ -127,3 +127,28 @@ class UserInfoView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+# ! update user profile
+class UpdateUserProfile(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, format=None):
+        serializer = UpdateUserProfileSerializer(
+            instance=request.user,
+            data=request.data
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            serializer.save()
+            return Response({"message": "User profile is updated.", "data": serializer.data}, status=status.HTTP_200_OK)
+
+        except:
+            return Response({
+                "error": {
+                    "message": "Something went wrong!",
+                    "status": "500"
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -35,9 +35,18 @@ class UploadProfileSerializer(serializers.ModelSerializer):
         fields = ["profile"]
 
     def update(self, instance, validated_data):
-        print(self.instance)
-        print(instance)
         instance.profile = validated_data.get("profile", instance.profile)
+        instance.save()
+        return instance
+
+class UpdateUserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "about"]
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get("username", instance.username)
+        instance.about = validated_data.get("about", instance.about)
         instance.save()
         return instance
 
