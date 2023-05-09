@@ -152,3 +152,22 @@ class UpdateUserProfile(APIView):
                     "status": "500"
                 }
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ! delete user account
+class DeleteUserAccount(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, format=None):
+        try:
+            user = request.user
+            user.delete()
+            return Response({"message": "User is Deleted."}, status=status.HTTP_200_OK)
+
+        except:
+            return Response({
+                "error": {
+                    "message": "Something went wrong!",
+                    "status": "500"
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

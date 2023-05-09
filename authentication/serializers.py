@@ -26,7 +26,8 @@ class CreateUserSerialzier(serializers.ModelSerializer):
 class CommonUserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "profile", "connection_id", "about"]
+        fields = ["id", "username", "email",
+                  "profile", "connection_id", "about"]
 
 
 class UploadProfileSerializer(serializers.ModelSerializer):
@@ -38,6 +39,7 @@ class UploadProfileSerializer(serializers.ModelSerializer):
         instance.profile = validated_data.get("profile", instance.profile)
         instance.save()
         return instance
+
 
 class UpdateUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
