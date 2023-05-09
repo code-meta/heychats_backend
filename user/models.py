@@ -39,6 +39,8 @@ class User(AbstractBaseUser):
 
     date_of_birth = models.DateField(blank=True, null=True)
 
+    about = models.TextField(blank=True, null=True, max_length=255)
+
     is_active = models.BooleanField(default=True)
 
     is_admin = models.BooleanField(default=False)
