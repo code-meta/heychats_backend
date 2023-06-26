@@ -122,109 +122,111 @@ class ChatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        # try:
-        rooms = ChatRoom.objects.filter(
-            Q(user1=request.user) | Q(user2=request.user)
-        )
+        try:
+            rooms = ChatRoom.objects.filter(
+                Q(user1=request.user) | Q(user2=request.user)
+            )
 
-        if not rooms:
+            if not rooms:
+                return Response({
+                    "error": {
+                        "message": "no chats found!",
+                        "status": "404"
+                    }
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            chat_connections = []
+
+            for room in rooms:
+
+                lastTMessage = TextMessage.objects.filter(
+                    room_id=room.room_id).order_by("created_at").last()
+
+                lastIMessage = ImageMessage.objects.filter(
+                    room_id=room.room_id).order_by("created_at").last()
+
+                lastTowMessages = []
+
+                t = TextMessageSerializer(instance=lastTMessage).data
+
+                if t.get("id") is not None:
+                    t["type"] = "text"
+                    lastTowMessages.append(t)
+
+                i = ImageMessageSerializer(instance=lastIMessage).data
+
+                if i.get("id") is not None:
+                    i["type"] = "image"
+                    lastTowMessages.append(i)
+
+                lastTowMessages.sort(key=lambda x: x['created_at'])
+
+                lastMessage = {}
+
+                if len(lastTowMessages) > 0:
+                    lastMessage = lastTowMessages.pop()
+                    lastMessage = {
+                        "message": lastMessage.get("message"),
+                        "type": lastMessage.get("type"),
+                    }
+
+                if room.user1.id != request.user.id:
+                    user = CommonUserInfoSerializer(instance=room.user1).data
+
+                    tMessages = TextMessage.objects.filter(
+                        room_id=room.room_id).count()
+
+                    iMessages = ImageMessage.objects.filter(
+                        room_id=room.room_id).count()
+
+                    chat_connections.append(
+                        {
+                            "username": user.get("username"),
+                            "profile": user.get("profile"),
+                            "room_id": room.room_id,
+                            "total_messages": tMessages + iMessages,
+                            "lastMessage": lastMessage,
+                        }
+                    )
+                    lastMessage = []
+
+                if room.user1.id == request.user.id:
+                    user = CommonUserInfoSerializer(instance=room.user2).data
+
+                    tMessages = TextMessage.objects.filter(
+                        room_id=room.room_id).count()
+
+                    iMessages = ImageMessage.objects.filter(
+                        room_id=room.room_id).count()
+
+                    chat_connections.append(
+                        {
+                            "username": user.get("username"),
+                            "profile": user.get("profile"),
+                            "room_id": room.room_id,
+                            "total_messages": tMessages + iMessages,
+                            "lastMessage": lastMessage,
+                        }
+                    )
+                    lastMessage = []
+
+            chat_connections.sort(
+                key=lambda x: x['total_messages'], reverse=True
+            )
+
+            return Response(
+                {"message": "all the chat connections.",
+                    "data": {"chats": chat_connections}},
+                status=status.HTTP_200_OK
+            )
+
+        except:
             return Response({
                 "error": {
-                    "message": "no chats found!",
-                    "status": "404"
+                    "message": "Something went wrong!",
+                    "status": "500"
                 }
-            }, status=status.HTTP_404_NOT_FOUND)
-
-        chat_connections = []
-
-        for room in rooms:
-
-            lastTMessage = TextMessage.objects.filter(
-                room_id=room.room_id).order_by("created_at").last()
-
-            lastIMessage = ImageMessage.objects.filter(
-                room_id=room.room_id).order_by("created_at").last()
-
-            lastTowMessages = []
-
-            t = TextMessageSerializer(instance=lastTMessage).data
-
-            if t.get("id") is not None:
-                t["type"] = "text"
-                lastTowMessages.append(t)
-
-            i = ImageMessageSerializer(instance=lastIMessage).data
-
-            if i.get("id") is not None:
-                i["type"] = "image"
-                lastTowMessages.append(i)
-
-            lastTowMessages.sort(key=lambda x: x['created_at'])
-
-            if len(lastTowMessages) > 0:
-                lastMessage = lastTowMessages.pop()
-                lastMessage = {
-                    "message": lastMessage.get("message"),
-                    "type": lastMessage.get("type"),
-                }
-
-            if room.user1.id != request.user.id:
-                user = CommonUserInfoSerializer(instance=room.user1).data
-
-                tMessages = TextMessage.objects.filter(
-                    room_id=room.room_id).count()
-
-                iMessages = ImageMessage.objects.filter(
-                    room_id=room.room_id).count()
-
-                chat_connections.append(
-                    {
-                        "username": user.get("username"),
-                        "profile": user.get("profile"),
-                        "room_id": room.room_id,
-                        "total_messages": tMessages + iMessages,
-                        "lastMessage": lastMessage,
-                    }
-                )
-                lastMessage = []
-
-            if room.user1.id == request.user.id:
-                user = CommonUserInfoSerializer(instance=room.user2).data
-
-                tMessages = TextMessage.objects.filter(
-                    room_id=room.room_id).count()
-
-                iMessages = ImageMessage.objects.filter(
-                    room_id=room.room_id).count()
-
-                chat_connections.append(
-                    {
-                        "username": user.get("username"),
-                        "profile": user.get("profile"),
-                        "room_id": room.room_id,
-                        "total_messages": tMessages + iMessages,
-                        "lastMessage": lastMessage,
-                    }
-                )
-                lastMessage = []
-
-        chat_connections.sort(
-            key=lambda x: x['total_messages'], reverse=True
-        )
-
-        return Response(
-            {"message": "all the chat connections.",
-                "data": {"chats": chat_connections}},
-            status=status.HTTP_200_OK
-        )
-
-        # except:
-        #     return Response({
-        #         "error": {
-        #             "message": "Something went wrong!",
-        #             "status": "500"
-        #         }
-        #     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ! Chat messages
