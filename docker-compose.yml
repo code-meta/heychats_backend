@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=chatapp
+      - MYSQL_USER=john
+      - MYSQL_PASSWORD=mysecret
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - heychats
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    networks:
+      - heychats
+  web:
+    build: .
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+    networks:
+      - heychats
+    depends_on:
+      - mysql
+volumes:
+  dbdata:
+networks:
+  heychats:
