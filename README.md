@@ -31,7 +31,7 @@ to run the project:
 docker-compose up -d
 ```
 
-**Once the backend is setupget the [frontend](https://github.com/code-meta/heychats-frontend) of this project.**
+**Once the backend is setup get the [frontend](https://github.com/code-meta/heychats-frontend) of this project.**
 
 this is a realtime chat application the backend is built using django and django-restframework.
 and the [frontend](https://github.com/code-meta/heychats-frontend) is built using next.js.
